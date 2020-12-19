@@ -12,6 +12,7 @@ export interface Client {
 }
 
 declare global {
+  // eslint-disable-next-line @typescript-eslint/no-namespace
   namespace NodeJS {
     interface Global {
       clients: Client[];
@@ -226,7 +227,7 @@ export class WindowPeerConnection extends EventEmitter {
     * Removes MediaStreamTrack object attached previously.
     */
   removeTrack(): void {
-    this.remoteTrackSender && this.peerConnection?.removeTrack(this.remoteTrackSender);
+    if (this.remoteTrackSender) this.peerConnection?.removeTrack(this.remoteTrackSender);
   }
 
   /**
@@ -251,9 +252,9 @@ export class WindowPeerConnection extends EventEmitter {
         offer,
       );
     })
-    .catch((error) => {
-      log(`${this.windowName}: Error when creating an offer ${error}`);
-    });
+      .catch((error) => {
+        log(`${this.windowName}: Error when creating an offer ${error}`);
+      });
   }
 
   /**
@@ -277,9 +278,9 @@ export class WindowPeerConnection extends EventEmitter {
         answer,
       );
     })
-    .catch((error) => {
-      log(`${this.windowName}: Error when creating an answer ${error}`);
-    });
+      .catch((error) => {
+        log(`${this.windowName}: Error when creating an answer ${error}`);
+      });
   }
 
   /**
@@ -320,6 +321,6 @@ export class WindowPeerConnection extends EventEmitter {
     this.removeAllListeners(WPCEvents.ReceivedTrack);
 
     this.emit(WPCEvents.ConnectionClosed);
-    this.options.onEnd && this.options.onEnd();
+    if (this.options.onEnd) this.options.onEnd();
   }
 }
