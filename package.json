@@ -1,0 +1,28 @@
+{
+  "name": "window-peer-connection",
+  "version": "1.0.0",
+  "description": "A typed wrapper for RTCPeerConnection between Electron BrowserWindow's using ipc messages for signaling.",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "repository": "https://github.com/lynoapp/window-peer-connection",
+  "author": "@lynoapp",
+  "license": "MIT",
+  "keywords": [
+    "electron",
+    "WebRTC",
+    "TypeScript"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "prepack": "yarn install && yarn build",
+    "release": "yarn publish --access public ."
+  },
+  "peerDependencies": {
+    "electron": "*"
+  },
+  "devDependencies": {
+    "@types/node": "14.14.13",
+    "electron": "11.1.0",
+    "typescript": "4.1.3"
+  }
+}
