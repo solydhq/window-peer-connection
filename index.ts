@@ -190,9 +190,9 @@ export class WindowPeerConnection extends EventEmitter {
     /**
       * Ice candidate connection state change event.
       */
-    this.peerConnection.oniceconnectionstatechange = (event: Event) => {
+    this.peerConnection.oniceconnectionstatechange = () => {
       if (this.peerConnection) {
-        log(`${this.windowName}: iceCandidateState change event: ${event.type}`);
+        log(`${this.windowName}: iceCandidateState change event: ${this.peerConnection.iceConnectionState}`);
       }
     };
   }
@@ -244,14 +244,11 @@ export class WindowPeerConnection extends EventEmitter {
   async sendTrack(receiverName: string): Promise<void> {
     log(`${this.windowName}: createOffer start`);
 
-    this.peerConnection?.createOffer({ offerToReceiveVideo: true }).then(async (offer) => {
-      await this.peerConnection?.setLocalDescription(offer);
-      this.sendMessage(
-        receiverName,
-        WPCMessages.Offer,
-        offer,
-      );
-    })
+    this.peerConnection?.createOffer({ offerToReceiveVideo: true })
+      .then(async (offer) => {
+        await this.peerConnection?.setLocalDescription(offer);
+        this.sendMessage(receiverName, WPCMessages.Offer, offer);
+      })
       .catch((error) => {
         log(`${this.windowName}: Error when creating an offer ${error}`);
       });
@@ -266,18 +263,15 @@ export class WindowPeerConnection extends EventEmitter {
     const offer: RTCSessionDescriptionInit = JSON.parse(data);
 
     log(`${this.windowName}: Setting remoteDescription`);
-    this.peerConnection?.setRemoteDescription(new RTCSessionDescription(offer));
+    await this.peerConnection?.setRemoteDescription(new RTCSessionDescription(offer));
     log(`${this.windowName}: remoteDescription set`);
 
-    this.peerConnection?.createAnswer().then(async (answer) => {
-      await this.peerConnection?.setLocalDescription(answer);
-      log(`${this.windowName}: Creating answer`);
-      this.sendMessage(
-        senderName,
-        WPCMessages.Answer,
-        answer,
-      );
-    })
+    this.peerConnection?.createAnswer()
+      .then(async (answer) => {
+        await this.peerConnection?.setLocalDescription(answer);
+        log(`${this.windowName}: Creating answer`);
+        this.sendMessage(senderName, WPCMessages.Answer, answer);
+      })
       .catch((error) => {
         log(`${this.windowName}: Error when creating an answer ${error}`);
       });
@@ -289,7 +283,20 @@ export class WindowPeerConnection extends EventEmitter {
   handleAnswer(event: Electron.IpcRendererEvent, args: any[]): void {
     const data = args[3];
     const answer: RTCSessionDescriptionInit = JSON.parse(data);
-    this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
+    log(`${this.windowName}: remoteDescription set: ${
+      !!this.peerConnection?.remoteDescription} - ${this.peerConnection?.iceConnectionState}`);
+    const interval = setInterval(() => {
+      log(`${this.windowName}: remoteDescription set: ${
+        !!this.peerConnection?.remoteDescription} - ${this.peerConnection?.iceConnectionState}`);
+      switch (this.peerConnection?.iceConnectionState) {
+        case 'checking':
+        case 'connected':
+          clearInterval(interval);
+          this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
+          break;
+        default:
+      }
+    }, 100);
   }
 
   /**
