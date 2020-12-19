@@ -125,15 +125,15 @@ function log(message: string) {
 export class WindowPeerConnection extends EventEmitter {
   windowName: string;
 
-  peerConnection: RTCPeerConnection | null;
+  peerConnection?: RTCPeerConnection;
 
-  remoteTrackSender: RTCRtpSender | null;
+  remoteTrackSender?: RTCRtpSender;
 
   options: WPCOptions;
 
   constructor(
     windowName: string,
-    options: WPCOptions,
+    options: WPCOptions = {},
   ) {
     super();
     this.peerConnection = new RTCPeerConnection();
@@ -219,7 +219,7 @@ export class WindowPeerConnection extends EventEmitter {
       return;
     }
 
-    this.remoteTrackSender = this.peerConnection?.addTrack(track) || null;
+    this.remoteTrackSender = this.peerConnection?.addTrack(track);
   }
 
   /**
@@ -309,9 +309,9 @@ export class WindowPeerConnection extends EventEmitter {
       this.peerConnection.ontrack = null;
       this.peerConnection.onicecandidate = null;
       this.peerConnection.oniceconnectionstatechange = null;
-      this.peerConnection = null;
+      this.peerConnection = undefined;
+      this.remoteTrackSender = undefined;
     }
-    this.remoteTrackSender = null;
 
     ipcRenderer.removeListener(WPCMessages.Offer, this.handleOffer);
     ipcRenderer.removeListener(WPCMessages.Answer, this.handleAnswer);
