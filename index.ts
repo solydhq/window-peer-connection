@@ -315,6 +315,12 @@ export class WindowPeerConnection extends EventEmitter {
     * Close connection and nullify handlers.
     */
   handleLeave(): void {
+    ipcRenderer.removeListener(WPCMessages.Offer, this.handleOffer);
+    ipcRenderer.removeListener(WPCMessages.Answer, this.handleAnswer);
+    ipcRenderer.removeListener(WPCMessages.Candidate, this.handleCandidate);
+    ipcRenderer.removeListener(WPCMessages.End, this.handleLeave);
+    this.removeAllListeners(WPCEvents.ReceivedTrack);
+
     if (this.peerConnection) {
       this.peerConnection.close();
       this.peerConnection.ontrack = null;
@@ -323,12 +329,6 @@ export class WindowPeerConnection extends EventEmitter {
       this.peerConnection = undefined;
       this.remoteTrackSender = undefined;
     }
-
-    ipcRenderer.removeListener(WPCMessages.Offer, this.handleOffer);
-    ipcRenderer.removeListener(WPCMessages.Answer, this.handleAnswer);
-    ipcRenderer.removeListener(WPCMessages.Candidate, this.handleCandidate);
-    ipcRenderer.removeListener(WPCMessages.End, this.handleLeave);
-    this.removeAllListeners(WPCEvents.ReceivedTrack);
 
     this.emit(WPCEvents.ConnectionClosed);
     if (this.options.onEnd) this.options.onEnd();
