@@ -132,6 +132,8 @@ export class WindowPeerConnection extends EventEmitter {
 
   options: WPCOptions;
 
+  isFirstAnswer = true;
+
   constructor(
     windowName: string,
     options: WPCOptions = {},
@@ -283,20 +285,21 @@ export class WindowPeerConnection extends EventEmitter {
   handleAnswer(event: Electron.IpcRendererEvent, args: any[]): void {
     const data = args[3];
     const answer: RTCSessionDescriptionInit = JSON.parse(data);
-    log(`${this.windowName}: remoteDescription set: ${
-      !!this.peerConnection?.remoteDescription} - ${this.peerConnection?.iceConnectionState}`);
-    const interval = setInterval(() => {
-      log(`${this.windowName}: remoteDescription set: ${
-        !!this.peerConnection?.remoteDescription} - ${this.peerConnection?.iceConnectionState}`);
-      switch (this.peerConnection?.iceConnectionState) {
-        case 'checking':
-        case 'connected':
-          clearInterval(interval);
-          this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
-          break;
-        default:
-      }
-    }, 100);
+    if (this.isFirstAnswer) {
+      this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
+      this.isFirstAnswer = false;
+    } else {
+      const interval = setInterval(() => {
+        switch (this.peerConnection?.iceConnectionState) {
+          case 'checking':
+          case 'connected':
+            clearInterval(interval);
+            this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
+            break;
+          default:
+        }
+      }, 100);
+    }
   }
 
   /**
