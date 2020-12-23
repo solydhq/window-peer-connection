@@ -38,6 +38,13 @@ export interface WPCOptions {
   onEnd?: () => void;
 }
 
+function logMessage(event: Event, message: string) {
+  if (process.env.NODE_ENV !== 'production') {
+    // eslint-disable-next-line no-console
+    console.log(message);
+  }
+}
+
 /**
   * The main process peer connection interface
   */
@@ -93,13 +100,6 @@ export const p2pChannel = {
     global.clients = [];
   },
 };
-
-function logMessage(event: Event, message: string) {
-  if (process.env.NODE_ENV !== 'production') {
-    // eslint-disable-next-line no-console
-    console.log(message);
-  }
-}
 
 function relayMessage(event: Event, args: any[]) {
   const receiverName = args[1];
