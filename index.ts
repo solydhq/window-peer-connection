@@ -265,7 +265,7 @@ export class WindowPeerConnection extends EventEmitter {
     const offer: RTCSessionDescriptionInit = JSON.parse(data);
 
     log(`${this.windowName}: Setting remoteDescription`);
-    await this.peerConnection?.setRemoteDescription(new RTCSessionDescription(offer));
+    await this.peerConnection?.setRemoteDescription(offer);
     log(`${this.windowName}: remoteDescription set`);
 
     this.peerConnection?.createAnswer()
@@ -286,7 +286,7 @@ export class WindowPeerConnection extends EventEmitter {
     const data = args[3];
     const answer: RTCSessionDescriptionInit = JSON.parse(data);
     if (this.isFirstAnswer) {
-      this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
+      this.peerConnection?.setRemoteDescription(answer);
       this.isFirstAnswer = false;
     } else {
       const interval = setInterval(() => {
@@ -294,7 +294,7 @@ export class WindowPeerConnection extends EventEmitter {
           case 'checking':
           case 'connected':
             clearInterval(interval);
-            this.peerConnection?.setRemoteDescription(new RTCSessionDescription(answer));
+            this.peerConnection?.setRemoteDescription(answer);
             break;
           default:
         }
