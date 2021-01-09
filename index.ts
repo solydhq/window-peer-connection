@@ -147,8 +147,7 @@ export class WindowPeerConnection extends EventEmitter {
       */
     this.sendMessage = this.sendMessage.bind(this);
     this.sendMessageToAll = this.sendMessageToAll.bind(this);
-    this.attachTrack = this.attachTrack.bind(this);
-    this.removeTrack = this.removeTrack.bind(this);
+    this.addTrack = this.addTrack.bind(this);
     this.onReceivedTrack = this.onReceivedTrack.bind(this);
     this.sendTrack = this.sendTrack.bind(this);
     this.handleOffer = this.handleOffer.bind(this);
@@ -218,22 +217,13 @@ export class WindowPeerConnection extends EventEmitter {
   /**
     * Attaches MediaStreamTrack object to send to peers.
     */
-  attachTrack(track: MediaStreamTrack): void {
-    if (
-      this.remoteTrackSender?.track &&
-      this.remoteTrackSender.track.id === track.id
-    ) {
-      return;
+  addTrack(track: MediaStreamTrack): void {
+    if (this.remoteTrackSender) {
+      log(`${this.windowName}: remove track for: ${this.remoteTrackSender}`);
+      this.peerConnection?.removeTrack(this.remoteTrackSender);
     }
-
-    this.remoteTrackSender = this.peerConnection?.addTrack(track);
-  }
-
-  /**
-    * Removes MediaStreamTrack object attached previously.
-    */
-  removeTrack(): void {
-    if (this.remoteTrackSender) this.peerConnection?.removeTrack(this.remoteTrackSender);
+    this.remoteTrackSender = this.peerConnection?.addTrack(track) as RTCRtpSender;
+    log(`${this.windowName}: added track for: ${this.remoteTrackSender}`);
   }
 
   /**
