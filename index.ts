@@ -146,6 +146,7 @@ export class WindowPeerConnection extends EventEmitter {
       * Bind "this" to methods
       */
     this.sendMessage = this.sendMessage.bind(this);
+    this.sendMessageToAll = this.sendMessageToAll.bind(this);
     this.attachTrack = this.attachTrack.bind(this);
     this.removeTrack = this.removeTrack.bind(this);
     this.onReceivedTrack = this.onReceivedTrack.bind(this);
@@ -176,14 +177,7 @@ export class WindowPeerConnection extends EventEmitter {
     this.peerConnection.onicecandidate = (event) => {
       log(`${this.windowName}: iceCandidate created`);
       if (event.candidate) {
-        const clients = remote.getGlobal('clients') as typeof global.clients;
-        clients.forEach(
-          (client) => {
-            if (client.name !== this.windowName) {
-              this.sendMessage(client.name, WPCMessages.Candidate, event.candidate);
-            }
-          },
-        );
+        this.sendMessageToAll(WPCMessages.Candidate, event.candidate);
       }
     };
 
@@ -200,13 +194,27 @@ export class WindowPeerConnection extends EventEmitter {
   /**
     * Sends message from main window to mircro window.
     */
-  sendMessage(receiverName: string, message: string, data: unknown): void {
+  sendMessage(receiverName: string, message: WPCMessages, data: unknown): void {
     ipcRenderer.send(WPCMessages.Relay, [
       this.windowName,
       receiverName,
       message,
       JSON.stringify(data),
     ]);
+  }
+
+  /**
+    * Sends message from main window to all other windows.
+    */
+  sendMessageToAll(message: WPCMessages, data: unknown): void {
+    const clients = remote.getGlobal('clients') as typeof global.clients;
+    clients.forEach(
+      (client) => {
+        if (client.name !== this.windowName) {
+          this.sendMessage(client.name, message, data);
+        }
+      },
+    );
   }
 
   /**
