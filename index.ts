@@ -185,9 +185,7 @@ export class WindowPeerConnection extends EventEmitter {
       * Ice candidate connection state change event.
       */
     this.peerConnection.oniceconnectionstatechange = () => {
-      if (this.peerConnection) {
-        log(`${this.windowName}: iceCandidateState change event: ${this.peerConnection.iceConnectionState}`);
-      }
+      log(`${this.windowName}: iceCandidateState change event: ${this.peerConnection?.iceConnectionState}`);
     };
   }
 
@@ -249,7 +247,7 @@ export class WindowPeerConnection extends EventEmitter {
     * Sends the local MediaStreamTrack to a registered peer.
     * @param {string} receiverName - name of the receiving BrowserWindow
     */
-  async sendTrack(receiverName: string): Promise<void> {
+  sendTrack(receiverName: string): void {
     log(`${this.windowName}: createOffer start`);
 
     this.peerConnection?.createOffer({ offerToReceiveVideo: true })
