@@ -35,7 +35,7 @@ export enum WPCEvents {
 }
 
 export interface WPCOptions {
-  onEnd?: () => void;
+  onConnectionClosed?: () => void;
 }
 
 function logMessage(event: Event, message: string) {
@@ -315,6 +315,6 @@ export class WindowPeerConnection extends EventEmitter {
     }
 
     this.emit(WPCEvents.ConnectionClosed);
-    if (this.options.onEnd) this.options.onEnd();
+    if (this.options.onConnectionClosed) this.options.onConnectionClosed();
   }
 }
