@@ -31,7 +31,6 @@ export enum WPCMessages {
 
 export enum WPCEvents {
   ReceivedTrack = 'received-track',
-  ConnectionClosed = 'connection-closed',
 }
 
 export interface WPCOptions {
@@ -310,7 +309,6 @@ export class WindowPeerConnection extends EventEmitter {
       this.remoteTrackSender = undefined;
     }
 
-    this.emit(WPCEvents.ConnectionClosed);
     if (this.options.onConnectionClosed) this.options.onConnectionClosed();
   }
 }
